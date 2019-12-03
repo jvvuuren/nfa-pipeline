@@ -1,5 +1,6 @@
 # NFA-Pipeline-2018-2019
-VFX pipeline of The Netherlands Film Academy 2018/2019
+Based on the VFX pipeline of The Netherlands Film Academy 2018/2019 by Rick Hulzinga.
+Original GitHub repository: https://github.com/RickHulzinga/NFA-Pipeline-2018-2019
 
 Todo before use:<br>
 Add shotgun_3 to /Python Modules<br>
