@@ -4,6 +4,11 @@ Original GitHub repository: https://github.com/RickHulzinga/NFA-Pipeline-2018-20
 
 ---
 
+# License notice:
+Be sure to read the license file before copying any code!
+
+---
+
 ### Todo's before use:
 * Add shotgun_3 to /Python Modules.
 * Add Pyside to /Python Modules.
@@ -13,5 +18,5 @@ Original GitHub repository: https://github.com/RickHulzinga/NFA-Pipeline-2018-20
 
 ---
 
-### Notice:
+### Notice of use:
 You need to create your own template files in /Templates!
