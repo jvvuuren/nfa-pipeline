@@ -4,7 +4,7 @@ Original GitHub repository: https://github.com/RickHulzinga/NFA-Pipeline-2018-20
 
 ---
 
-# License notice:
+### License notice:
 Be sure to read the license file before copying any code!
 
 ---
