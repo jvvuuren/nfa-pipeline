@@ -5,35 +5,56 @@ import shutil
 
 import getpass
 
-pipelinePath = "<PROJECT ROOT>" 
+import ConfigParser
+config = ConfigParser.RawConfigParser()
+config.read('pipelineConfig.cfg')
 
+pipelinePath = config.get('Directories', 'pipelinePath')
+rootDir = config.get('Directories', 'rootDir')
+writeRootDir = config.get('Directories', 'writeRootDir')
+print(pipelinePath)
 
-sys.path.append(pipelinePath +  "PythonModules")
+shotgun_url = config.get('Shotgun', 'shotgun_url')
+sg_api_key = config.get('Shotgun', 'api_key')
+
+sys.path.append(pipelinePath + "\\PythonModules")
 
 import NfaLog as log
-
 logger = log.nfaLog().getLogger("ProjectEditor")
 
-
 import shotgun_api3
-sg = shotgun_api3.Shotgun("<SHOTGUN URL>",script_name="projectedit",api_key="<SCRIPT KEY>")
+sg = shotgun_api3.Shotgun(shotgun_url,script_name="projectedit",api_key=sg_api_key)
 
-
-
-
-
-logger.info("Loaded")
+#logger.info("Loaded")
 
 clear = lambda: os.system('cls')
 
-rootDir = "<PROJECTS ROOT LOCATION>"
+# Folders with their relative subfolders
+rootfolders = ['01_pre', '02_ref', '03_source', '04_elements', '05_workfiles', '06_renders', '_pipeline']
+_pre = ['01_script', '02_breakdown', '03_concept', '04_visie', '05_previs', '06_techvis', '07_planning']
+_script = ['latest', 'archive']
 
-writeRootDir =  "<PROJECTS RENDER LOCATION>"
+_ref = ['01_setdata', '02_schematics', '03_images', '04_video', '05_anim', '06_picturelock']
+_setdata = ['photogrammetry', 'reports', 'setimages', 'hdri', 'lens']
 
-#list of usernames for the personal folders in the project
-usernames = ["John Doe","Jane Doe"]
+_source = ['source']
 
+_elements = ['01_assets', '02_caches', '03_hdri', '04_mattepainting', '05_stock']
+_caches = ['anim', 'sim']
+_stock = ['images', 'sequences', 'models']
 
+_workfiles = ['assets', 'shot']
+
+_renders = ['prerender', 'cg', 'delivery']
+
+_pipeline = ['templates']
+templates = ['Nuke', 'Houdini', 'Maya']
+
+def foldersFromList(folders):
+	for i in folders:
+		os.makedirs(i)
+		print(i)
+	return
 
 def start():
 	editOrNew = raw_input("(E)dit or (N)ew? ")
@@ -75,58 +96,68 @@ def new():
 		print "Failed: Directory exists."
 		return
 
-	print "Done. \n Creating Subdirectories.....\n"
+	print "\n Creating main folders...\n"
 
-	os.chdir(rootDirName)
+	projectRoot = rootDir + "\\" + rootDirName# + "\\"
 
+	#Navigate to project root
+	os.chdir(projectRoot)
+	foldersFromList(rootfolders)
 
-	os.makedirs("asset")
-	print "Made /asset"
+	print "\n Creating subfolders folders...\n"
 
-	os.makedirs("input")
-	print "Made /input"
+	#01_pre
+	os.chdir(projectRoot + '\\01_pre')
+	foldersFromList(_pre)
+	os.chdir(projectRoot + '\\01_pre\\01_script')
+	foldersFromList(_script)
 
-	os.makedirs("pre")
-	print "Made /pre"
+	#02_ref
+	os.chdir(projectRoot + '\\02_ref')
+	foldersFromList(_ref)
+	os.chdir(projectRoot + '\\02_ref\\01_setdata')
+	foldersFromList(_setdata)
 
-	os.makedirs("ref")
-	print "Made /ref"
+	#03_source is empty on purpose
+	
+	#04_elements
+	os.chdir(projectRoot + '\\04_elements')
+	foldersFromList(_elements)
+	os.chdir(projectRoot + '\\04_elements\\02_caches')
+	foldersFromList(_caches)
+	os.chdir(projectRoot + '\\04_elements\\05_stock')
+	foldersFromList(_stock)
 
-	os.makedirs("setup")
-	print "Made /setup"
+	#05_workfiles
+	os.chdir(projectRoot + '\\05_workfiles')
+	foldersFromList(_workfiles)
 
-	os.makedirs("user")
-	print "Made /user"
+	#06_renders
+	os.chdir(projectRoot + '\\06_renders')
+	foldersFromList(_renders)
 
-	os.makedirs("template")
-	print "Made /template"
-
+	#_pipeline
+	os.chdir(projectRoot + '\\_pipeline')
+	foldersFromList(_pipeline)
+	
 	print "Done made subdirs \n\n"
 
 	print "Filling template folder...\n\n"
 
-	os.chdir("template")
+	os.chdir("templates")
 
 	print "Copying nuke files"
-	shutil.copytree("<PATH TO NUKE TEMPLATES>",rootDir + "\\" +rootDirName + "\\template\\Nuke")
+	shutil.copytree(pipelinePath + "\\Templates\\Nuke",projectRoot + "\\_pipeline\\templates\\Nuke")
 
 	print "Copying houdini files"
-	shutil.copytree("<PATH TO MAYA TEMPLATE>",rootDir + "\\" +rootDirName + "\\template\\Maya")
+	shutil.copytree(pipelinePath + "\\Templates\\Houdini",projectRoot + "\\_pipeline\\templates\\Maya")
 
 	print "Copying maya files"
-	shutil.copytree("<PATH TO HOUDINI TEMPLATE>",rootDir + "\\" +rootDirName + "\\template\\Houdini")
+	shutil.copytree(pipelinePath + "\\Templates\\Maya",projectRoot + "\\_pipeline\\templates\\Houdini")
 
 	print "Done coyping files."
 	
-	os.chdir("../")
-	os.chdir("user")
-	print "Making user dirs\n"
-	
-
-	for uname in usernames:
-		print "\t/" + uname
-		os.makedirs(uname)
-
+	#os.chdir("../")
 
 	print "\n\nMaking folder on write server..."
 
@@ -134,7 +165,7 @@ def new():
 
 	os.makedirs(rootDirName)
 
-	print "\n\nGoging to create shotgun project"
+	print "\n\n Going to create shotgun project"
 	sgdata = {
 	'name':name,
 	'sg_projectcode': code,

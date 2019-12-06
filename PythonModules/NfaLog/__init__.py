@@ -4,12 +4,18 @@ import logging
 import sys
 import getpass
 
+import ConfigParser
+config = ConfigParser.RawConfigParser()
+config.read('pipelineConfig.cfg')
+
+pipelinePath = config.get('Directories', 'pipelinePath')
+
 class nfaLog():
     def getLogger(self,name="unkown"):
         logger = logging.getLogger("root")
         logger.setLevel(logging.DEBUG)
 
-        logpath  = "<LOG DIRECTORY>"
+        logpath  = pipelinePath + "\\logs"
 
         # create file handler which logs even debug messages
         fh = logging.FileHandler(logpath  + name +  "_"+ getpass.getuser() + ".log")

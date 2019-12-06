@@ -1,2 +1,5 @@
 PythonModules/PySide/
 PythonModules/shotgun_api3/
+/localConfigCreate.py
+/pipelineConfig.cfg
+logs/*
