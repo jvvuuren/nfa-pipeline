@@ -1,6 +1,4 @@
-
-import os
-import sys
+import os, sys
 import shutil
 
 import getpass
@@ -12,7 +10,6 @@ config.read('pipelineConfig.cfg')
 pipelinePath = config.get('Directories', 'pipelinePath')
 rootDir = config.get('Directories', 'rootDir')
 writeRootDir = config.get('Directories', 'writeRootDir')
-print(pipelinePath)
 
 shotgun_url = config.get('Shotgun', 'shotgun_url')
 sg_api_key = config.get('Shotgun', 'api_key')

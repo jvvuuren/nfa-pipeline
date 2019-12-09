@@ -1,26 +1,26 @@
 import os, sys
 import shutil
 
+import ConfigParser
+config = ConfigParser.RawConfigParser()
+config.read('pipelineConfig.cfg')
 
-pipelinePath = "<PIPELINE ROOT>" 
+pipelinePath = config.get('Directories', 'pipelinePath')
+rootDir = config.get('Directories', 'rootDir')
+writeRootDir = config.get('Directories', 'writeRootDir')
 
-sys.path.append(pipelinePath +  "PythonModules")
+shotgun_url = config.get('Shotgun', 'shotgun_url')
+sg_api_key = config.get('Shotgun', 'api_key')
+
+sys.path.append(pipelinePath +  "\\PythonModules")
 
 import NfaLog as log
-
 logger = log.nfaLog().getLogger("ShotEditor")
 
-
 import shotgun_api3
-sg = shotgun_api3.Shotgun("<SHOTGUN URL>",script_name="shoteditor",api_key="<SHOTGUN SCRIPT KEY>")
+sg = shotgun_api3.Shotgun(shotgun_url,script_name="shoteditor",api_key=sg_api_key)
 
 sgproject = {}
-
-
-
-rootDir = "<PROJECTS LOCATION>"
-
-writeRootDir =  "<PROJECTS RENDER LOCATION>"
 
 clear = lambda: os.system('cls')
 
@@ -74,7 +74,7 @@ def editor():
 	global selectedProject
 	global sgproject
 
-	print "Retreving shotgun project info"
+	print "Retrieving shotgun project info"
 	filters = [['sg_projectcode', 'is', selectedProject]]
 	sgproject = sg.find_one('Project', filters)
 
@@ -108,46 +108,36 @@ def new():
 	scenenr = raw_input("Scene nr: ")
 	shotnr = raw_input("Shot nr: ")
 
-	scenenr = scenenr.zfill(4)
-	shotnr = shotnr.zfill(4)	
+	scenenr = scenenr.zfill(3)
+	shotnr = shotnr.zfill(3)	
 
 	dirname = selectedProject.lower() + "_" + scenenr + "_" + shotnr
 
-	os.chdir("input")
-	print "Creating input"
+	os.chdir("03_source")
+	print "Creating source"
+	if not os.path.exists(dirname):
+		os.makedirs(dirname)
+
+	os.chdir(projectDir +"\\workfiles\\shots")
+	print "Creating workfiles"
 	if not os.path.exists(dirname):
 		os.makedirs(dirname)
 		os.chdir(dirname)
 
-		os.makedirs("cg")
-		os.makedirs("matchmove")
-		os.makedirs("plate")
-		os.makedirs("shot")
-		os.makedirs("sim")
-		os.makedirs("mattepainting")
-		os.makedirs("denoise")
-
-	os.chdir(projectDir +"\\setup")
-
-	print "Creating setup"
-	if not os.path.exists(dirname):
-		os.makedirs(dirname)
-		os.chdir(dirname)
-
-		shutil.copytree(projectDir + "\\template\\Nuke",projectDir+ "\\setup\\" + dirname + "\\Nuke")
+		shutil.copytree(projectDir + "\\_pipeline\\templates\\Nuke",projectDir+ "\\setup\\" + dirname + "\\Nuke")
 		os.chdir("Nuke")
 		os.rename("nuke.nk", dirname+"_v001"+".nk")
 
 		os.chdir("../")
 
-		shutil.copytree(projectDir + "\\template\\Houdini",projectDir+ "\\setup\\" + dirname + "\\Houdini")
+		shutil.copytree(projectDir + "\\_pipeline\\templates\\Houdini",projectDir+ "\\setup\\" + dirname + "\\Houdini")
 		os.chdir("Houdini")
 		os.rename("houdini.hipnc", dirname+"_v001"+".hipnc")
 
 
 		os.chdir("../")
 
-		shutil.copytree(projectDir + "\\template\\Maya",projectDir+ "\\setup\\" + dirname + "\\Maya")
+		shutil.copytree(projectDir + "\\_pipeline\\templates\\Maya",projectDir+ "\\setup\\" + dirname + "\\Maya")
 		os.chdir("Maya/scenes")
 		os.rename("maya.ma", dirname+".0001"+".ma")
 
@@ -159,14 +149,15 @@ def new():
 
 	print "Creating folder on write server"
 
-	os.chdir(writeRootDir + "\\" + projectDirName)
+	os.chdir(writeRootDir + "\\" + projectDirName + "\\01_cgrenders")
 	if not os.path.exists(dirname):
 		os.makedirs(dirname)
 		os.chdir(dirname)
-		os.makedirs("cg")
-		os.makedirs("comp")
-		os.makedirs("rewrite")
-		os.makedirs("previews")
+
+	os.chdir(writeRootDir + "\\" + projectDirName + "\\03_compp")
+	if not os.path.exists(dirname):
+		os.makedirs(dirname)
+		os.chdir(dirname)
 
 	logger.info("Writing shot to shotgun")
 	filters = [['project', 'is', sgproject],['code','is',scenenr]]
